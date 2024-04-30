@@ -15,32 +15,51 @@ class Watercolor {
 
         for (let a = 0; a < TWO_PI; a += this.angle) {
             base.push([x + r * cos(a), y + r * sin(a)]);
-            // variance.push(randomGaussian(1.0, 0.2));
+            variance.push(randomGaussian(1.0, 0.2));
         }
         this.layers.push(base);
-        // this.variance_layers.push(variance);
+        this.variance_layers.push(variance);
+        print(this.layers[0]);
+        print(this.variance_layers);
     }
 
     test_deform() {
-        this.layers[0] = this.n_deform(this.layers[0], 4);
-        for (let i = 0; i < 50; ++i) {
-            this.layers.push(this.n_deform(this.layers[0], 5));
+        let base_idx = 0;
+        let rounds = 3;
+        let layers_per_round = 10;
+        [this.layers[0], this.variance_layers[0]] = this.n_deform(this.layers[0], this.variance_layers[0], 1);
+        for (let r = 0; r < rounds; ++r) {
+            for (let l = 0; l < layers_per_round; ++l) {
+                let [new_layer, new_var] = this.n_deform(this.layers[base_idx], this.variance_layers[base_idx], 3);
+                this.layers.push(new_layer);
+                this.variance_layers.push(new_var);
+            }
+            let [new_layer, new_var] = this.n_deform(this.layers[base_idx], this.variance_layers[base_idx], 2);
+            this.layers.push(new_layer);
+            this.variance_layers.push(new_var);
+            base_idx = this.layers.length - 1;
         }
     }
 
-    n_deform(points, depth) {
+    n_deform(points, variances, depth) {
         for (let i = 0; i < depth; ++i) {
-            points = this.deform(points);
+            // print(`i: ${i}`);
+            [points, variances] = this.deform(points, variances);
         }
-        return points;
+        return [points, variances];
     }
 
-    deform(points) {
+    deform(points, variances) {
         // Loop through vertices
         // Deform outwards
         // this should be somewhat perpendicular, some slight slant
         let new_points = [];
+        let new_variances = [];
 
+        // print('PRINT POINTS');
+        // print(points);
+        // print('PRINT VARS');
+        // print(variances);
         for (let i = 0; i < points.length; ++i) {
             let [x1, y1] = points[i];
             let [x2, y2] = points[(i + 1) % points.length];
@@ -59,17 +78,19 @@ class Watercolor {
             let midVector = createVector(xmid, ymid);
             let diffVector = p5.Vector.sub(p1Vector, midVector);
             let edgeLen = p5.Vector.sub(p1Vector, p2Vector).mag();
-            diffVector.rotate(randomGaussian(HALF_PI, HALF_PI/2))
-            diffVector.setMag(max(0, randomGaussian(edgeLen / 3, edgeLen / 5)));
+            diffVector.rotate(randomGaussian(HALF_PI, HALF_PI/2));
+            diffVector.setMag(max(0, randomGaussian(variances[i] * edgeLen / 3, variances[i] * edgeLen / 5)));
 
             let new_point = p5.Vector.add(midVector, diffVector);
 
             new_points.push([x1, y1]);
             new_points.push([new_point.x, new_point.y]);
-            // this.subdivide(new_points, x1, x2, y1, y2, depth, randomGaussian(variance, variance/2.5), vdiv);
+
+            new_variances.push(variances[i]);
+            new_variances.push(randomGaussian(variances[i], 0.02));
         }
 
-        return new_points;
+        return [new_points, new_variances];
     }
 
     draw_layer(i) {
