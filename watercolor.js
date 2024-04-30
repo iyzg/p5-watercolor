@@ -43,23 +43,15 @@ class Watercolor {
 
     n_deform(points, variances, depth) {
         for (let i = 0; i < depth; ++i) {
-            // print(`i: ${i}`);
             [points, variances] = this.deform(points, variances);
         }
         return [points, variances];
     }
 
     deform(points, variances) {
-        // Loop through vertices
-        // Deform outwards
-        // this should be somewhat perpendicular, some slight slant
         let new_points = [];
         let new_variances = [];
 
-        // print('PRINT POINTS');
-        // print(points);
-        // print('PRINT VARS');
-        // print(variances);
         for (let i = 0; i < points.length; ++i) {
             let [x1, y1] = points[i];
             let [x2, y2] = points[(i + 1) % points.length];
@@ -94,6 +86,7 @@ class Watercolor {
     }
 
     draw_layer(i) {
+        push();
         strokeWeight(0);
         fill(this.color);
         beginShape();
@@ -101,17 +94,6 @@ class Watercolor {
             vertex(x, y);
         }
         endShape();
-    }
-
-    render() {
-        strokeWeight(0);
-        fill(this.color);
-        for (let layer of this.layers) {
-            beginShape();
-            for (let [x, y] of layer) {
-                vertex(x, y);
-            }
-            endShape();
-        }
+        pop();
     }
 }
