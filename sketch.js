@@ -3,11 +3,13 @@ let watercolors = [];
 
 function setup() {
   createCanvas(displayWidth, displayHeight);
+  // angleMode(DEGREES);
   // watercolors.push(new Watercolor(width / 3, height/2, width/3, 10, 'rgba(204, 83, 58, 0.045)'));
   // watercolors.push(new Watercolor(width / 4, height/2, width/3.25, 10, 'rgba(28, 142, 230, 0.04)'));
-  watercolors.push(new Watercolor(width / 2, height/2, height/3.25, 10, 'rgba(215, 86, 87, 1.0)'));
+  watercolors.push(new Watercolor(width / 2, height/2, height/3.75, 10, 'rgba(215, 86, 87, 0.04)'));
 
   for (let watercolor of watercolors) {
+    watercolor.test_deform();
     // watercolor.create_base_poly();
     // watercolor.create_poly_stack(100);
   }
